@@ -83,26 +83,40 @@
         let length = () => parseFloat(lengthElement.value);
         let sag = () => parseFloat(sagElement.value);
 
-
-        // RenderFunction(f) renders the input funtion f on the canvas.
         function render(f, minX, maxX) {
 
             ctx = canvasElement.getContext('2d');
             const width = canvasElement.clientWidth;
             const height = canvasElement.clientHeight;
             ctx.clearRect(0,0,width,height);
-            ctx.beginPath();
+           
             const y0 = f(minX);
             const xc = (x) =>  width / 2 + x; 
             const yc = (y) =>  -(y - y0);
 
+            ctx.beginPath();
             ctx.moveTo(xc(minX), height);
+            ctx.lineTo(xc(minX), yc(f(minX)));
+
+            ctx.moveTo(xc(maxX), yc(f(maxX)));
+            ctx.lineTo(xc(maxX), height);
+
+            ctx.lineWidth = 8;
+            ctx.strokeStyle = 'gray';
+            ctx.stroke();
+            ctx.closePath();
+            
+            ctx.beginPath();
+            ctx.moveTo(xc(minX),yc(f(minX)));
             for (let x = minX; x <= maxX; x+=1) {
                 ctx.lineTo(xc(x), yc(f(x)));
             }
             ctx.lineTo(xc(maxX), yc(f(maxX)));
-            ctx.lineTo(xc(maxX), height);
+
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
             ctx.stroke();
+            ctx.closePath();
         }
 
         function computeA(l, h) {
@@ -115,11 +129,12 @@
         }
 
         function update() {
+
             const l = length();
             const h = sag();
+
             a = computeA(l, h);
             const H = computeDistance(l, h);
-
             lengthElement.value = l;
             distanceElement.value = H.toFixed(2);
             sagElement.value = h;
@@ -127,6 +142,7 @@
             maxX = H/2;
             render((x) => a * Math.cosh(x/a), minX, maxX);
         }
+        
         lengthElement.onchange = update;
         sagElement.onchange = update;
         update();
